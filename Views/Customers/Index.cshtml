@@ -1,0 +1,21 @@
+﻿@model MovieApp.ViewModels.CustomersViewModel
+<h2>Customers</h2>
+
+
+@if (!Model.Customers.Any())
+{
+    <p>No customers yet!</p>
+}
+else
+{
+    <table class="table table-active">
+        @foreach (var customer in Model.Customers)
+        {
+            <tr>
+                <td>
+                    <a href="@Url.Action("GetCustomer", new { id = customer.Id })">@customer.Name</a>
+                </td>
+            </tr>
+        }
+    </table>
+}
