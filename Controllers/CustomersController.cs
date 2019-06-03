@@ -1,7 +1,9 @@
-﻿using MovieApp.Models;
+﻿using MovieApp.Contexts;
+using MovieApp.Models;
 using MovieApp.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -10,12 +12,7 @@ namespace MovieApp.Controllers
 {
     public class CustomersController : Controller
     {
-        private Dictionary<int, Customer> CustomersDict { get; } = new Dictionary<int, Customer>
-            {
-                { 1, new Customer { Name = "Aaron", Id = 1 } },
-                { 2, new Customer { Name = "Dillon", Id = 2 } },
-                { 3, new Customer { Name = "Ben", Id = 3 } },
-            };
+        private LocalDatabase context = new LocalDatabase();
 
         // GET: Customers
         public ActionResult Index(int? id)
@@ -25,9 +22,10 @@ namespace MovieApp.Controllers
                 return RedirectToAction("GetCustomer", new { id = id.Value });
             }
 
+            var customers = context.Customers.Take(100);
             var customersViewModel = new CustomersViewModel
             {
-                Customers = CustomersDict.Values
+                Customers = customers
             };
 
             return View(customersViewModel);
@@ -35,11 +33,15 @@ namespace MovieApp.Controllers
 
         public ActionResult GetCustomer(int id)
         {
-            Customer customer;
-            if (!CustomersDict.TryGetValue(id, out customer))
+            var customer = context.Customers
+                .Where(c => c.Id == id)
+                .DefaultIfEmpty(null)
+                .FirstOrDefault();
+            if (customer is null)
             {
                 return HttpNotFound();
             }
+
             return View(customer);
         }
     }
